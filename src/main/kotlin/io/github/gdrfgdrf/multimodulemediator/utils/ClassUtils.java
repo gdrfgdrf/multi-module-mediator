@@ -53,7 +53,7 @@ public class ClassUtils {
                         packageName + "." + searchRoot
                                 .getName()
                                 .substring(0, searchRoot.getName().lastIndexOf(".")),
-                        true,
+                        false,
                         classLoader
                 );
                 if (predicate == null || predicate.test(clazz)) {
@@ -111,7 +111,7 @@ public class ClassUtils {
                     }
                     String className = entryName.substring(0, entryName.lastIndexOf("."))
                             .replace("/", ".");
-                    Class<?> clazz = Class.forName(className, true, classLoader);
+                    Class<?> clazz = Class.forName(className, false, classLoader);
 
                     if (predicate == null || predicate.test(clazz)) {
                         result.add(clazz);

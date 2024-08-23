@@ -58,7 +58,7 @@ object Registry {
             return@searchJar it.isAnnotationPresent(EnumServiceImpl::class.java)
         }, enumServiceImplClasses)
 
-        if (enumServiceClasses.size == enumServiceImplClasses.size) {
+        if (enumServiceClasses.size != enumServiceImplClasses.size) {
             throw IllegalArgumentException("enum service classes set's size is not equals enum service impl classes set's size")
         }
 

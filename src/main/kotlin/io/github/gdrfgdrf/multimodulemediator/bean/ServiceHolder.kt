@@ -12,6 +12,10 @@ open class ServiceHolder(
     protected var singletonInstance: Any? = null
 
     init {
+        initialize()
+    }
+
+    open fun initialize() {
         val service = clazz.getAnnotation(Service::class.java)
         this.singleton = service.singleton
     }
@@ -35,9 +39,9 @@ open class ServiceHolder(
         val serviceImpl = implClass.getAnnotation(ServiceImpl::class.java)
         if (serviceImpl.instanceGetter.isEmpty()) {
             val instance = if (serviceImpl.needArgument && argumentSet != null) {
-                serviceImpl::class.java.getConstructor(ArgumentSet::class.java).newInstance(argumentSet)
+                implClass.getConstructor(ArgumentSet::class.java).newInstance(argumentSet)
             } else {
-                serviceImpl::class.java.getConstructor().newInstance()
+                implClass.getConstructor().newInstance()
             }
 
             if (singleton) {
@@ -46,9 +50,9 @@ open class ServiceHolder(
             return instance
         } else {
             val instance = if (serviceImpl.needArgument && argumentSet != null) {
-                serviceImpl::class.java.getMethod(serviceImpl.instanceGetter, ArgumentSet::class.java).invoke(argumentSet)
+                implClass.getMethod(serviceImpl.instanceGetter, ArgumentSet::class.java).invoke(argumentSet)
             } else {
-                serviceImpl::class.java.getMethod(serviceImpl.instanceGetter).invoke(null)
+                implClass.getMethod(serviceImpl.instanceGetter).invoke(null)
             }
 
             if (singleton) {

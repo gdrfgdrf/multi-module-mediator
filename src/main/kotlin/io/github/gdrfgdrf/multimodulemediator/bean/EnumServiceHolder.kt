@@ -1,7 +1,7 @@
 package io.github.gdrfgdrf.multimodulemediator.bean
 
 class EnumServiceHolder(clazz: Class<*>, implClass: Class<*>) : ServiceHolder(clazz, implClass) {
-    init {
+    override fun initialize() {
         singleton = false
         singletonInstance = null
     }
