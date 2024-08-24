@@ -3,6 +3,7 @@ package io.github.gdrfgdrf.multimodulemediator.bean
 import io.github.gdrfgdrf.multimodulemediator.annotation.KotlinSingleton
 import io.github.gdrfgdrf.multimodulemediator.annotation.Service
 import io.github.gdrfgdrf.multimodulemediator.annotation.ServiceImpl
+import io.github.gdrfgdrf.multimodulemediator.enums.Operations
 
 open class ServiceHolder(
     val clazz: Class<*>,
@@ -20,7 +21,11 @@ open class ServiceHolder(
         this.singleton = service.singleton
     }
 
-    open fun get(argumentSet: ArgumentSet? = null): Any {
+    open fun get(operations: Operations, argumentSet: ArgumentSet? = null): Any? {
+        if (operations != Operations.GET) {
+            return null
+        }
+
         if (singleton && singletonInstance != null) {
             return singletonInstance!!
         }

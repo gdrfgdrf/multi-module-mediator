@@ -12,4 +12,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface EnumServiceImpl {
     String value();
+    String searcher() default "";
 }
