@@ -55,7 +55,7 @@ open class ServiceHolder(
             return instance
         } else {
             val instance = if (serviceImpl.needArgument && argumentSet != null) {
-                implClass.getMethod(serviceImpl.instanceGetter, ArgumentSet::class.java).invoke(argumentSet)
+                implClass.getMethod(serviceImpl.instanceGetter, ArgumentSet::class.java).invoke(null, argumentSet)
             } else {
                 implClass.getMethod(serviceImpl.instanceGetter).invoke(null)
             }
