@@ -86,6 +86,33 @@ object Registry {
         }, enumServiceImplClasses)
 
         if (enumServiceClasses.size != enumServiceImplClasses.size) {
+            val array = arrayListOf<Class<*>>()
+
+            enumServiceClasses.forEach { clazz ->
+                val list = enumServiceImplClasses.stream()
+                    .filter {
+                        return@filter it.interfaces.contains(clazz)
+                    }
+                    .toList()
+                if (list.isEmpty()) {
+                    array.add(clazz)
+                }
+            }
+            enumServiceImplClasses.forEach { clazz ->
+                val list = enumServiceClasses.stream()
+                    .filter {
+                        return@filter clazz.interfaces.contains(it)
+                    }
+                    .toList()
+                if (list.isEmpty()) {
+                    array.add(clazz)
+                }
+            }
+            array.distinct()
+            array.forEach {
+                println(it)
+            }
+
             throw IllegalArgumentException("enum service classes set's size is not equals enum service impl classes set's size")
         }
 
