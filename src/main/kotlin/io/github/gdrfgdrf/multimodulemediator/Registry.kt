@@ -27,6 +27,33 @@ object Registry {
         )
 
         if (serviceClasses.size != serviceImplClasses.size) {
+            val array = arrayListOf<Class<*>>()
+
+            serviceClasses.forEach { clazz ->
+                val list = serviceImplClasses.stream()
+                    .filter {
+                        return@filter it.interfaces.contains(clazz)
+                    }
+                    .toList()
+                if (list.isEmpty()) {
+                    array.add(clazz)
+                }
+            }
+            serviceImplClasses.forEach { clazz ->
+                val list = serviceClasses.stream()
+                    .filter {
+                        return@filter clazz.interfaces.contains(it)
+                    }
+                    .toList()
+                if (list.isEmpty()) {
+                    array.add(clazz)
+                }
+            }
+            array.distinct()
+            array.forEach {
+                println(it)
+            }
+
             throw IllegalArgumentException("service classes set's size is not equals service impl classes set's size")
         }
 
