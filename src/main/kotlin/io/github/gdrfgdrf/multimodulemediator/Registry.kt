@@ -32,7 +32,7 @@ object Registry {
             serviceClasses.forEach { clazz ->
                 val list = serviceImplClasses.stream()
                     .filter {
-                        return@filter it.interfaces.contains(clazz)
+                        return@filter it.interfaces.contains(clazz) || it.superclass == clazz
                     }
                     .toList()
                 if (list.isEmpty()) {
@@ -42,7 +42,7 @@ object Registry {
             serviceImplClasses.forEach { clazz ->
                 val list = serviceClasses.stream()
                     .filter {
-                        return@filter clazz.interfaces.contains(it)
+                        return@filter clazz.interfaces.contains(it) || clazz.superclass == it
                     }
                     .toList()
                 if (list.isEmpty()) {
@@ -91,7 +91,7 @@ object Registry {
             enumServiceClasses.forEach { clazz ->
                 val list = enumServiceImplClasses.stream()
                     .filter {
-                        return@filter it.interfaces.contains(clazz)
+                        return@filter it.interfaces.contains(clazz) || it.superclass == clazz
                     }
                     .toList()
                 if (list.isEmpty()) {
@@ -101,7 +101,7 @@ object Registry {
             enumServiceImplClasses.forEach { clazz ->
                 val list = enumServiceClasses.stream()
                     .filter {
-                        return@filter clazz.interfaces.contains(it)
+                        return@filter clazz.interfaces.contains(it) || it.superclass == clazz
                     }
                     .toList()
                 if (list.isEmpty()) {
