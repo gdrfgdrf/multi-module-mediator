@@ -16,6 +16,10 @@ open class EnumInstance<T> : TypeGetter<T>() {
     }
 
     fun search(name: String): List<T> {
-        return Mediator.search<T>(type, name)!!
+        return Mediator.search(type, name)!!
+    }
+
+    fun search0(name: String): List<T>? {
+        return Mediator.search(type, name)
     }
 }
