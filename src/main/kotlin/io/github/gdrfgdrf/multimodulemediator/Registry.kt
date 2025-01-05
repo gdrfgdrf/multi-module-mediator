@@ -7,21 +7,29 @@ import io.github.gdrfgdrf.multimodulemediator.annotation.ServiceImpl
 import io.github.gdrfgdrf.multimodulemediator.utils.ClassUtils
 
 object Registry {
-    fun register(classLoader: ClassLoader, path: String) {
+    fun register(classLoader: ClassLoader, path: String, filter: ((Class<*>) -> Boolean)? = null) {
+        val finalFilter = if (filter != null) {
+            filter
+        } else {
+            {
+                true
+            }
+        }
+
         val serviceClasses = LinkedHashSet<Class<*>>()
         val serviceImplClasses = LinkedHashSet<Class<*>>()
 
         ClassUtils.searchJar(
             classLoader, path,
             {
-                return@searchJar it.isAnnotationPresent(Service::class.java)
+                return@searchJar it.isAnnotationPresent(Service::class.java) && finalFilter(it)
             },
             serviceClasses,
         )
         ClassUtils.searchJar(
             classLoader, path,
             {
-                return@searchJar it.isAnnotationPresent(ServiceImpl::class.java)
+                return@searchJar it.isAnnotationPresent(ServiceImpl::class.java) && finalFilter(it)
             },
             serviceImplClasses
         )
@@ -91,7 +99,7 @@ object Registry {
             enumServiceClasses.forEach { clazz ->
                 val list = enumServiceImplClasses.stream()
                     .filter {
-                        return@filter it.interfaces.contains(clazz) || it.superclass == clazz
+                        return@filter (it.interfaces.contains(clazz) || it.superclass == clazz) && finalFilter(it)
                     }
                     .toList()
                 if (list.isEmpty()) {
@@ -101,7 +109,7 @@ object Registry {
             enumServiceImplClasses.forEach { clazz ->
                 val list = enumServiceClasses.stream()
                     .filter {
-                        return@filter clazz.interfaces.contains(it) || it.superclass == clazz
+                        return@filter (clazz.interfaces.contains(it) || it.superclass == clazz) && finalFilter(it)
                     }
                     .toList()
                 if (list.isEmpty()) {
