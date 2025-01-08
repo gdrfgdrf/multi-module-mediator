@@ -5,9 +5,15 @@ import io.github.gdrfgdrf.multimodulemediator.annotation.EnumServiceImpl
 import io.github.gdrfgdrf.multimodulemediator.annotation.Service
 import io.github.gdrfgdrf.multimodulemediator.annotation.ServiceImpl
 import io.github.gdrfgdrf.multimodulemediator.utils.ClassUtils
+import kotlin.streams.toList
 
 object Registry {
-    fun register(classLoader: ClassLoader, path: String, filter: ((Class<*>) -> Boolean)? = null) {
+    fun register(
+        classLoader: ClassLoader,
+        path: String,
+        ignoredPackageNames: Array<String>? = null,
+        filter: ((Class<*>) -> Boolean)? = null
+    ) {
         val finalFilter = if (filter != null) {
             filter
         } else {
@@ -20,14 +26,18 @@ object Registry {
         val serviceImplClasses = LinkedHashSet<Class<*>>()
 
         ClassUtils.searchJar(
-            classLoader, path,
+            classLoader,
+            path,
+            ignoredPackageNames,
             {
                 return@searchJar it.isAnnotationPresent(Service::class.java) && finalFilter(it)
             },
             serviceClasses,
         )
         ClassUtils.searchJar(
-            classLoader, path,
+            classLoader,
+            path,
+            ignoredPackageNames,
             {
                 return@searchJar it.isAnnotationPresent(ServiceImpl::class.java) && finalFilter(it)
             },
@@ -75,7 +85,7 @@ object Registry {
                     return@filter value == serviceImpl.value
                 }
                 .findAny()
-            if (optional.isEmpty) {
+            if (!optional.isPresent) {
                 throw IllegalArgumentException("Unable to find the implementation of service $clazz")
             }
 
@@ -86,12 +96,24 @@ object Registry {
         val enumServiceClasses = LinkedHashSet<Class<*>>()
         val enumServiceImplClasses = LinkedHashSet<Class<*>>()
 
-        ClassUtils.searchJar(classLoader, path, {
-            return@searchJar it.isAnnotationPresent(EnumService::class.java)
-        }, enumServiceClasses)
-        ClassUtils.searchJar(classLoader, path, {
-            return@searchJar it.isAnnotationPresent(EnumServiceImpl::class.java)
-        }, enumServiceImplClasses)
+        ClassUtils.searchJar(
+            classLoader,
+            path,
+            ignoredPackageNames,
+            {
+                return@searchJar it.isAnnotationPresent(EnumService::class.java)
+            },
+            enumServiceClasses
+        )
+        ClassUtils.searchJar(
+            classLoader,
+            path,
+            ignoredPackageNames,
+            {
+                return@searchJar it.isAnnotationPresent(EnumServiceImpl::class.java)
+            },
+            enumServiceImplClasses
+        )
 
         if (enumServiceClasses.size != enumServiceImplClasses.size) {
             val array = arrayListOf<Class<*>>()
@@ -134,7 +156,7 @@ object Registry {
                     return@filter value == enumServiceImpl.value
                 }
                 .findAny()
-            if (optional.isEmpty) {
+            if (!optional.isPresent) {
                 throw IllegalArgumentException("Unable to find the implementation of enum service $clazz")
             }
 

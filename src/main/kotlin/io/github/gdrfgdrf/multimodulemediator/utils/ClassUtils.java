@@ -18,16 +18,18 @@ public class ClassUtils {
     public static void search(
             File searchRoot,
             String packageName,
+            String[] ignoredPackageNames,
             Predicate<Class<?>> predicate,
             ClassLoader classLoader,
             Set<Class<?>> result
     ) {
-        searchInternal(searchRoot, packageName, predicate, result, classLoader, true);
+        searchInternal(searchRoot, packageName, ignoredPackageNames, predicate, result, classLoader, true);
     }
 
     private static void searchInternal(
             File searchRoot,
             String packageName,
+            String[] ignoredPackageNames,
             Predicate<Class<?>> predicate,
             Set<Class<?>> result,
             ClassLoader classLoader,
@@ -43,16 +45,29 @@ public class ClassUtils {
             }
 
             String finalPackageName = packageName;
-            Arrays.stream(files).forEach(file -> searchInternal(file, finalPackageName, predicate, result, classLoader, false));
+            Arrays.stream(files).forEach(file -> searchInternal(
+                    file,
+                    finalPackageName,
+                    ignoredPackageNames,
+                    predicate,
+                    result,
+                    classLoader,
+                    false
+            ));
 
             return;
         }
         if (searchRoot.getName().endsWith(".class")) {
             try {
+                String classPackageName = packageName + "." + searchRoot
+                        .getName()
+                        .substring(0, searchRoot.getName().lastIndexOf("."));
+                if (needIgnore(classPackageName, ignoredPackageNames)) {
+                    return;
+                }
+
                 Class<?> clazz = Class.forName(
-                        packageName + "." + searchRoot
-                                .getName()
-                                .substring(0, searchRoot.getName().lastIndexOf(".")),
+                        classPackageName,
                         false,
                         classLoader
                 );
@@ -68,6 +83,7 @@ public class ClassUtils {
     public static void searchJar(
             ClassLoader classLoader,
             String packageName,
+            String[] ignoredPackageNames,
             Predicate<Class<?>> predicate,
             Set<Class<?>> result
     ) {
@@ -88,7 +104,7 @@ public class ClassUtils {
                         String packagePath = packageName.replace(".", "/");
                         File searchRoot = new File(classpath + packagePath);
 
-                        search(searchRoot, packageName, predicate, classLoader, result);
+                        search(searchRoot, packageName, ignoredPackageNames, predicate, classLoader, result);
                     }
                     continue;
                 }
@@ -111,8 +127,11 @@ public class ClassUtils {
                     }
                     String className = entryName.substring(0, entryName.lastIndexOf("."))
                             .replace("/", ".");
-                    Class<?> clazz = Class.forName(className, false, classLoader);
+                    if (needIgnore(className, ignoredPackageNames)) {
+                        return;
+                    }
 
+                    Class<?> clazz = Class.forName(className, false, classLoader);
                     if (predicate == null || predicate.test(clazz)) {
                         result.add(clazz);
                     }
@@ -121,5 +140,18 @@ public class ClassUtils {
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static boolean needIgnore(String classPackageName, String[] ignoredPackageNames) {
+        if (ignoredPackageNames == null) {
+            return false;
+        }
+
+        for (String ignoredPackageName : ignoredPackageNames) {
+            if (classPackageName.startsWith(ignoredPackageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
