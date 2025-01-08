@@ -8,7 +8,12 @@ open class EnumInstance<T> : TypeGetter<T>() {
     }
 
     fun find(name: String): T? {
-        return Mediator.valueOf<T>(type, name)
+        runCatching {
+            return Mediator.valueOf<T>(type, name)
+        }.onFailure {
+            return null
+        }
+        return null
     }
 
     fun values(): Array<T> {
