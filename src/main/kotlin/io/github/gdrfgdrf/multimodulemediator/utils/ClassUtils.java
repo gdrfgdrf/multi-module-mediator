@@ -128,7 +128,7 @@ public class ClassUtils {
                     String className = entryName.substring(0, entryName.lastIndexOf("."))
                             .replace("/", ".");
                     if (needIgnore(className, ignoredPackageNames)) {
-                        return;
+                        continue;
                     }
 
                     Class<?> clazz = Class.forName(className, false, classLoader);
